@@ -1,0 +1,11 @@
+[package]
+name = "infrastructure"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+domain = { path = "../domain" }
+application = { path = "../application" }
+rocket = { version = "0.5.1", features = ["json"] }
+uuid = { version = "1.11.0", features = ["v4"] }
+serde = { version = "1.0.216", features = ["derive"] }
