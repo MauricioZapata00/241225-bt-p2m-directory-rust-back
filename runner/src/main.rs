@@ -3,7 +3,7 @@ extern crate rocket;
 
 use rocket::{State, http::Status, response::status, serde::json::Json};
 use domain::model::commerce::Commerce;
-use infrastructure::controller::commerce_controller::CommerceController;
+use infrastructure::commerces::controller::commerce_controller::CommerceController;
 
 #[get("/commerces")]
 async fn list_commerces(controller: &State<CommerceController>) -> Result<Json<Vec<Commerce>>, Status> {
