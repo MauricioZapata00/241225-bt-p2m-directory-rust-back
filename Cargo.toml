@@ -1,7 +1,7 @@
 [workspace]
 members = [
-    "domain",
     "application",
+    "domain",
     "infrastructure",
     "runner"
 ]

@@ -1,4 +1,6 @@
 use crate::exception::error_attributes::ErrorAttributes;
+use std::fmt;
+use std::error::Error;
 
 #[derive(Debug)]
 pub enum BankError {
@@ -43,5 +45,22 @@ impl BankError {
             BankError::CreditorBankNotFound(attrs) => attrs.get_message(),
             BankError::DebtorBankNotActive(attrs) => attrs.get_message(),
         }
+    }
+}
+
+impl fmt::Display for BankError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Error in bank with error code: {} \tError is: {}", self.get_code(), self.get_message())
+    }
+}
+
+impl Error for BankError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        // This error doesn't wrap another error, so return None
+        None
+    }
+
+    fn description(&self) -> &str {
+        self.get_message()
     }
 }

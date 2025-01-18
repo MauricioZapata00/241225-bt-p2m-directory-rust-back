@@ -1,4 +1,6 @@
 use crate::exception::error_attributes::ErrorAttributes;
+use std::fmt;
+use std::error::Error;
 
 #[derive(Debug)]
 pub enum CommerceError {
@@ -134,5 +136,22 @@ impl CommerceError {
             CommerceError::NotValidFormatBank(attrs) => attrs.get_message(),
             CommerceError::CommerceInactive(attrs) => attrs.get_message(),
         }
+    }
+}
+
+impl fmt::Display for CommerceError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Error in commerce with error code: {} \tError is: {}", self.get_code(), self.get_message())
+    }
+}
+
+impl Error for CommerceError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        // This error doesn't wrap another error, so return None
+        None
+    }
+
+    fn description(&self) -> &str {
+        self.get_message()
     }
 }

@@ -1,34 +1,39 @@
 use serde::{Serialize, Deserialize};
-use crate::commerces::controller::dto::account_dto::AccountCommand;
+use domain::exception::commerce_error::CommerceError;
+use domain::model::account::Account;
+use domain::model::commerce::Commerce;
+use domain::model::commerce_status::CommerceStatus;
+use crate::commerces::controller::dto::account_dto::AccountDto;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CommerceCommand {
+pub struct CommerceDto {
     #[serde(rename = "commerceId")]
-    pub commerce_id: i64,
+    pub commerce_id: Option<i64>,
 
     #[serde(rename = "aliasValue")]
-    pub alias_value: String,
+    pub alias_value: Option<String>,
 
     #[serde(rename = "aliasType")]
-    pub alias_type: i64,
+    pub alias_type: Option<i64>,
 
     #[serde(rename = "legalBusinessName")]
-    pub legal_business_name: String,
+    pub legal_business_name: Option<String>,
 
     #[serde(rename = "commerceBankAccount")]
-    pub commerce_bank_account: AccountCommand,
+    pub commerce_bank_account: Option<AccountDto>,
 
-    pub ruc: String,
+    #[serde(rename = "ruc")]
+    pub ruc: Option<String>,
 }
 
-impl CommerceCommand {
+impl CommerceDto {
     pub fn new(
-        commerce_id: i64,
-        alias_value: String,
-        alias_type: i64,
-        legal_business_name: String,
-        commerce_bank_account: AccountCommand,
-        ruc: String,
+        commerce_id: Option<i64>,
+        alias_value: Option<String>,
+        alias_type: Option<i64>,
+        legal_business_name: Option<String>,
+        commerce_bank_account: Option<AccountDto>,
+        ruc: Option<String>,
     ) -> Self {
         Self {
             commerce_id,
@@ -39,4 +44,89 @@ impl CommerceCommand {
             ruc,
         }
     }
+
+    fn validate(&self) -> Result<(), CommerceError> {
+        // Validate required fields
+        let commerce_alias_type = self.alias_type
+            .ok_or_else(|| CommerceError::not_valid_alias_type())?;
+
+        let alias = self.alias_value
+            .as_ref()
+            .ok_or_else(|| CommerceError::not_valid_alias_format())?;
+
+        let commerce_legal_business_name = self.legal_business_name
+            .as_ref()
+            .ok_or_else(|| CommerceError::not_valid_alias_format())?;
+
+        let account = self.commerce_bank_account
+            .as_ref()
+            .ok_or_else(|| CommerceError::not_valid_account_format())?;
+
+        let commerce_ruc = self.ruc
+            .as_ref()
+            .ok_or_else(|| CommerceError::not_valid_ruc())?;
+
+        // Now validate the values themselves
+        validate_long_number(Some(commerce_alias_type))?;
+        validate_null_string_value(alias, CommerceError::not_valid_alias_format)?;
+        validate_null_string_value(commerce_legal_business_name, CommerceError::not_valid_legal_business)?;
+        validate_account(account)?;
+        validate_null_string_value(commerce_ruc, CommerceError::not_valid_ruc)?;
+
+
+        Ok(())
+    }
+
+    // Convert to domain model after validation
+    pub fn to_domain(self) -> Result<Commerce, CommerceError> {
+        self.validate()?;
+
+        // After validation, we can safely unwrap since we know the values exist
+        Ok(Commerce::new(
+            self.commerce_id.unwrap(),
+            self.alias_value.unwrap(),
+            self.alias_type.unwrap(),
+            self.legal_business_name.unwrap(),
+            account_dto_to_domain(&self.commerce_bank_account.unwrap()),
+            self.ruc.unwrap(),
+            CommerceStatus::new(String::from("")),
+        ))
+    }
+
+
+}
+
+fn validate_long_number(number: Option<i64>) -> Result<(), CommerceError> {
+    number.filter(|&id| id > 0)
+        .map(|_| ())
+        .ok_or_else(|| CommerceError::not_valid_alias_type())
+}
+
+fn validate_account(account: &AccountDto) -> Result<(), CommerceError> {
+    // Validate account number
+    validate_null_string_value(&account.account_number, CommerceError::not_valid_account_format)?;
+
+    // Validate bank code
+    validate_null_string_value(&account.bank_code, CommerceError::bank_code_is_empty_or_null)?;
+
+    Ok(())
+}
+
+fn validate_null_string_value<F>(value: &String, error_fn: F) -> Result<(), CommerceError>
+where
+    F: FnOnce() -> CommerceError
+{
+    if value.trim().is_empty() {
+        Err(error_fn())
+    } else {
+        Ok(())
+    }
+}
+
+fn account_dto_to_domain(account: &AccountDto) -> Account {
+    Account::new(
+        account.account_number.clone(),
+        account.bank_code.clone(),
+        0
+    )
 }

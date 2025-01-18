@@ -1,3 +1,5 @@
+use std::error::Error;
+use std::fmt;
 use crate::exception::error_attributes::ErrorAttributes;
 
 #[derive(Debug)]
@@ -143,5 +145,22 @@ impl UserError {
             UserError::CreditorInvalidAlias(attrs) => attrs.get_message(),
             UserError::CreditorInvalidCountryCode(attrs) => attrs.get_message(),
         }
+    }
+}
+
+impl fmt::Display for UserError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "Error in user with error code: {} \tError is: {}", self.get_code(), self.get_message())
+    }
+}
+
+impl Error for UserError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        // This error doesn't wrap another error, so return None
+        None
+    }
+
+    fn description(&self) -> &str {
+        self.get_message()
     }
 }

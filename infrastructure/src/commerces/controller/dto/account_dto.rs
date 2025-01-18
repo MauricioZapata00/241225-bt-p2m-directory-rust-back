@@ -1,7 +1,7 @@
 use serde::{Serialize, Deserialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct AccountCommand {
+pub struct AccountDto {
     #[serde(rename = "accountNumber")]
     pub account_number: String,
 
@@ -9,7 +9,7 @@ pub struct AccountCommand {
     pub bank_code: String,
 }
 
-impl AccountCommand {
+impl AccountDto {
     pub fn new(account_number: String, bank_code: String) -> Self {
         Self {
             account_number,

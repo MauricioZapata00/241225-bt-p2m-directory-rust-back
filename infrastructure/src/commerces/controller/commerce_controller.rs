@@ -3,6 +3,7 @@ use uuid::Uuid;
 use domain::model::commerce::Commerce;
 use domain::model::account::Account;
 use domain::model::commerce_status::CommerceStatus;
+use crate::commerces::controller::dto::commerce_dto::CommerceDto;
 
 pub struct CommerceController {
 }
@@ -26,4 +27,11 @@ impl CommerceController {
         //     Err(_) => Err(Status::InternalServerError),
         // }
     }
+
+    // pub async fn create_commerce(&self, commerce: CommerceDto) -> Result<(), Status> {
+    //     let commerce_mapped_from_dto = match commerce.to_domain(){
+    //         Ok(commerce) => commerce,
+    //         Err(comm) => Status::new(500)
+    //     }
+    // }
 }
