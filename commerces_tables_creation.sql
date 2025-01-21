@@ -77,3 +77,11 @@ UPDATE dbo.banks SET bank_code='001' WHERE bank_id=1;
 UPDATE dbo.banks SET bank_code='002' WHERE bank_id=2;
 UPDATE dbo.banks SET bank_code='003' WHERE bank_id=3;
 UPDATE dbo.banks SET status_id=2 WHERE bank_id=3;
+
+-- alter account table
+ALTER TABLE dbo.accounts ADD bank_code varchar(100);
+
+-- Update some fields
+UPDATE dbo.accounts SET accounts.bank_code = '001' WHERE account_id = 1;
+UPDATE dbo.accounts SET accounts.bank_code = '002' WHERE account_id = 2;
+UPDATE dbo.accounts SET accounts.bank_code = '002' WHERE account_id = 3;

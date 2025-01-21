@@ -1,7 +1,10 @@
 pub mod port {
     pub mod db {
+        pub mod banks {
+            pub mod bank_repository_port;
+        }
         pub mod commerces {
-            pub mod commerce_repository;
+            pub mod commerce_repository_port;
         }
     }
 }

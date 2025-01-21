@@ -3,7 +3,7 @@ use domain::exception::commerce_error::CommerceError;
 use domain::model::account::Account;
 use domain::model::commerce::Commerce;
 use domain::model::commerce_status::CommerceStatus;
-use crate::commerces::controller::dto::account_dto::AccountDto;
+use crate::entrypoint::controller::commerces::dto::account_dto::AccountDto;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommerceDto {
@@ -125,6 +125,7 @@ where
 
 fn account_dto_to_domain(account: &AccountDto) -> Account {
     Account::new(
+        0,
         account.account_number.clone(),
         account.bank_code.clone(),
         0

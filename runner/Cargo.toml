@@ -8,5 +8,5 @@ domain = { path = "../domain" }
 application = { path = "../application" }
 infrastructure = { path = "../infrastructure" }
 rocket = { version = "0.5.1", features = ["json"] }
-tokio = { version = "1.42.0", features = ["full"] }
+tokio = { version = "1.43.0", features = ["full"] }
 futures = "0.3.31"

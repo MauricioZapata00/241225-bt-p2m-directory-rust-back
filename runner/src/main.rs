@@ -5,7 +5,7 @@ use rocket::{State, http::Status, response::status, serde::json::Json};
 use domain::model::commerce::Commerce;
 use infrastructure::commerces::controller::commerce_controller::CommerceController;
 
-#[get("/commerces")]
+#[get("/entrypoint")]
 async fn list_commerces(controller: &State<CommerceController>) -> Result<Json<Vec<Commerce>>, Status> {
     controller.get_commerce().await
 }

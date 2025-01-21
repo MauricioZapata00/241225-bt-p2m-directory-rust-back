@@ -3,7 +3,7 @@ use uuid::Uuid;
 use domain::model::commerce::Commerce;
 use domain::model::account::Account;
 use domain::model::commerce_status::CommerceStatus;
-use crate::commerces::controller::dto::commerce_dto::CommerceDto;
+use crate::entrypoint::controller::commerces::dto::commerce_dto::CommerceDto;
 
 pub struct CommerceController {
 }
@@ -19,7 +19,7 @@ impl CommerceController {
                                          String::from("@JabonSucio"),
                                          1,
                                          String::from("Comercios_tontos"),
-                                         Account::new(String::from("8526489"), String::from("K7015afM1"), 5),
+                                         Account::new(1,String::from("8526489"), String::from("K7015afM1"), 5),
                                          random_v4_id_generator.to_string(),
                                          CommerceStatus::new(String::from("ACTIVE")))]))
         // match self.service.get_all_todos().await {
