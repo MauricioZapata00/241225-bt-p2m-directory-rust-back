@@ -17,6 +17,7 @@ pub mod model {
 
 pub mod exception {
     pub mod bank_error;
+    pub mod database_error;
     pub mod commerce_error;
     mod error_attributes;
     pub mod user_error;
