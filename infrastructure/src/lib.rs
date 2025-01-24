@@ -23,6 +23,7 @@ pub mod db {
                 pub mod commerce_status_entity;
             }
             pub mod repository {
+                pub mod account_repository;
                 pub mod commerce_repository;
             }
         }

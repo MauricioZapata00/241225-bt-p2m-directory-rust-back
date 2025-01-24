@@ -7,6 +7,8 @@ pub struct AccountEntity {
     pub account_id: i64,
     #[sqlx(rename = "account_number")]
     pub account_number: String,
+    #[sqlx(rename = "bank_code")]
+    pub bank_code: String,
     #[sqlx(rename = "bank_id")]
     pub bank_id: i64,
 }
