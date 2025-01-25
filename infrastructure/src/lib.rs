@@ -17,6 +17,9 @@ pub mod db {
                 pub mod commerce_repository_adapter;
             }
             pub mod entity {
+                pub mod wrappers {
+                    pub mod commerce_db_info_wrapper;
+                }
                 pub mod account_entity;
                 pub mod alias_type_entity;
                 pub mod commerce_entity;
@@ -25,6 +28,7 @@ pub mod db {
             pub mod repository {
                 pub mod account_repository;
                 pub mod commerce_repository;
+                pub mod commerce_status_repository;
             }
         }
     }
