@@ -64,7 +64,7 @@ impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
 
 impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
 for ValidateCommerceToStoreService<BR, CR> {
-    fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn Error>> {
+    async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn Error>> {
         validate_commerce_field_formats(&commerce)?;
         let mut commerce_validated = commerce;
         commerce_validated.alias = format!("@{}", commerce_validated.alias);

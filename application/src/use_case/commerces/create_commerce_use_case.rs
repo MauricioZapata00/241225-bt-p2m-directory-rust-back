@@ -1,6 +1,6 @@
-use domain::exception::commerce_error::CommerceError;
+use std::error::Error;
 use domain::model::commerce::Commerce;
 
 pub trait CreateCommerceUseCase {
-    fn process(&self, commerce: Commerce) -> Result<Commerce, CommerceError>;
+    async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn Error>>;
 }
