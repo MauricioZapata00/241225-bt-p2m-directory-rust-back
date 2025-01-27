@@ -3,7 +3,7 @@ use uuid::Uuid;
 use domain::model::commerce::Commerce;
 use domain::model::account::Account;
 use domain::model::commerce_status::CommerceStatus;
-use crate::entrypoint::controller::commerces::dto::commerce_dto::CommerceDto;
+use crate::entrypoint::commerces::dto::commerce_dto::CommerceDto;
 
 pub struct CommerceController {
 }

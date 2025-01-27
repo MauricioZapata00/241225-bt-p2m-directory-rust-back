@@ -44,8 +44,9 @@ impl CommerceRepositoryPort for CommerceRepositoryAdapter {
         -> Result<bool, DatabaseError> {
         match self.commerce_repository
             .find_commerce_by_ruc_or_legal_business_name(ruc, legal_business_name).await {
-            Ok(Some(_)) => Ok(true),
-            Ok(None) => Ok(false),
+            Ok(Some(commerce_entity)) => {Ok(*commerce_entity.legal_business_name == *legal_business_name
+                && *commerce_entity.ruc == *ruc)},
+            Ok(None) => Ok(true),
             Err(err) => Err(DatabaseError::Unexpected(err.into()))
         }
     }

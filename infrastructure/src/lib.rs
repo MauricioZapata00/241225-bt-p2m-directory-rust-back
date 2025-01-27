@@ -35,13 +35,11 @@ pub mod db {
 }
 
 pub mod entrypoint {
-    pub mod controller {
-        pub mod commerces {
-            pub mod dto {
-                pub mod account_dto;
-                pub mod commerce_dto;
-            }
-            pub mod commerce_controller;
+    pub mod commerces {
+        pub mod dto {
+            pub mod account_dto;
+            pub mod commerce_dto;
         }
+        pub mod commerce_controller;
     }
 }

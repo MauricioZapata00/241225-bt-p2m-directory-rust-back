@@ -85,7 +85,7 @@ impl CommerceRepository for SqlxCommerceRepository {
         let alias_with_at_sign = format!("@{}", alias_value);
         sqlx::query_as::<_, CommerceEntity>(
             "SELECT * FROM dbo.commerces WHERE ruc = @p1
-                OR alias = @p2"
+                OR alias = @p2 AND commerce_status_id = 1"
         )
             .bind(ruc)
             .bind(&alias_with_at_sign)
@@ -98,7 +98,7 @@ impl CommerceRepository for SqlxCommerceRepository {
         -> Result<Option<CommerceEntity>, Error> {
         sqlx::query_as::<_, CommerceEntity>(
             "SELECT * FROM dbo.commerces WHERE ruc = @p1
-                OR legal_business_name = @p2"
+                OR legal_business_name = @p2 AND commerce_status_id = 1"
         )
             .bind(ruc)
             .bind(legal_business_name)
