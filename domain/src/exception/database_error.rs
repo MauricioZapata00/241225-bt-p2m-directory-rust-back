@@ -29,7 +29,7 @@ impl Error for DatabaseError {
             DatabaseError::Unexpected(err) => Some(err.as_ref())
         }
     }
-    fn description(&self) -> &str {
-        &self.get_message()
-    }
 }
+
+unsafe impl Send for DatabaseError {}
+unsafe impl Sync for DatabaseError {}

@@ -10,13 +10,13 @@ use crate::db::mssql::commerces::repository::commerce_status_repository::{Commer
 
 #[async_trait]
 pub trait CommerceRepository {
-    async fn find_commerce_by_ruc_or_alias(&self, ruc: &String, alias_value: &String)
+    async fn find_commerce_by_ruc_or_alias<'a>(&self, ruc: &'a String, alias_value: &'a String)
         -> Result<Option<CommerceEntity>, Error>;
-    async fn find_commerce_by_ruc_or_legal_business_name(&self, ruc: &String,
-                                                         legal_business_name: &String)
+    async fn find_commerce_by_ruc_or_legal_business_name<'a>(&self, ruc: &'a String,
+                                                         legal_business_name: &'a String)
         -> Result<Option<CommerceEntity>, Error>;
-    async fn create_commerce(&self, commerce_entity: &CommerceEntity, bank_code: &String,
-                             account_number: &String)
+    async fn create_commerce<'a>(&self, commerce_entity: &'a CommerceEntity, bank_code: &'a String,
+                             account_number: &'a String)
         -> Result<Option<CommerceDbInfoWrapper>, Error>;
 
 }
@@ -40,11 +40,12 @@ impl SqlxCommerceRepository {
         }
     }
 
-    async fn validate_account_entity_inserted_and_insert_commerce(&self, commerce_entity: &CommerceEntity,
-                                                                  account_entity: &Option<AccountEntity>)
+    async fn validate_account_entity_inserted_and_insert_commerce<'a>(&self,
+                                                                      commerce_entity: &'a CommerceEntity,
+                                                                  account_entity: &'a Option<AccountEntity>)
         -> Result<Option<CommerceDbInfoWrapper>, Error> {
         match account_entity {
-            None => {Err(Error::Database(Box::from("Account could not be inserted")))}
+            None => Err(Error::RowNotFound),
             Some(account_inserted) => {
                 let commerce_entity_stored = sqlx::query_as::<_, CommerceEntity>(
                     "INSERT INTO dbo.commerces (alias, alias_type_id, legal_business_name, account_id,
@@ -57,7 +58,7 @@ impl SqlxCommerceRepository {
                     .bind(&commerce_entity.legal_business_name)
                     .bind(&account_inserted.account_id)
                     .bind(&commerce_entity.ruc)
-                    .fetch_optional(&self.pool)
+                    .fetch_optional(&*self.pool)
                     .await?.unwrap();
                 let commerce_status_entity = self
                     .sqlx_commerce_status_repository
@@ -80,8 +81,9 @@ impl SqlxCommerceRepository {
     }
 }
 
+#[async_trait]
 impl CommerceRepository for SqlxCommerceRepository {
-    async fn find_commerce_by_ruc_or_alias(&self, ruc: &String, alias_value: &String)
+    async fn find_commerce_by_ruc_or_alias<'a>(&self, ruc: &'a String, alias_value: &'a String)
         -> Result<Option<CommerceEntity>, Error> {
         let alias_with_at_sign = format!("@{}", alias_value);
         sqlx::query_as::<_, CommerceEntity>(
@@ -90,12 +92,12 @@ impl CommerceRepository for SqlxCommerceRepository {
         )
             .bind(ruc)
             .bind(&alias_with_at_sign)
-            .fetch_optional(&self.pool)
+            .fetch_optional(&*self.pool)
             .await
     }
 
-    async fn find_commerce_by_ruc_or_legal_business_name(&self, ruc: &String,
-                                                         legal_business_name: &String)
+    async fn find_commerce_by_ruc_or_legal_business_name<'a>(&self, ruc: &'a String,
+                                                         legal_business_name: &'a String)
         -> Result<Option<CommerceEntity>, Error> {
         sqlx::query_as::<_, CommerceEntity>(
             "SELECT * FROM dbo.commerces WHERE ruc = @p1
@@ -103,12 +105,12 @@ impl CommerceRepository for SqlxCommerceRepository {
         )
             .bind(ruc)
             .bind(legal_business_name)
-            .fetch_optional(&self.pool)
+            .fetch_optional(&*self.pool)
             .await
     }
 
-    async fn create_commerce(&self, commerce_entity: &CommerceEntity, bank_code: &String,
-                             account_number: &String)
+    async fn create_commerce<'a>(&self, commerce_entity: &'a CommerceEntity, bank_code: &'a String,
+                             account_number: &'a String)
         -> Result<Option<CommerceDbInfoWrapper>, Error>
     {
         let bank_entity = self.sqlx_bank_repository.find_bank_by_bank_code(bank_code)
@@ -119,14 +121,10 @@ impl CommerceRepository for SqlxCommerceRepository {
                 let account_entity = self.sqlx_account_repository
                     .insert_new_account(account_number, bank_code, &bank_entity.bank_id).await?;
                 self.validate_account_entity_inserted_and_insert_commerce(commerce_entity,
-                                                                          &account_entity)
+                                                                          &account_entity).await
             },
             None => Err(Error::ColumnNotFound(format!("Bank not found with bank_code: {}", bank_code)))
         }
-
-
     }
-
-
 }
 

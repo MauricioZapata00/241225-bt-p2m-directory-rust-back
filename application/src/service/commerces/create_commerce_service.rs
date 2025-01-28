@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::error::Error as StdError;
 use std::sync::Arc;
 use domain::model::commerce::Commerce;
 use crate::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
@@ -17,7 +17,7 @@ impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceServ
             commerce_repository
         }
     }
-    async fn create_commerce(&self, valid_commerce: &Commerce) -> Result<Commerce, Box<dyn Error>>{
+    async fn create_commerce(&self, valid_commerce: &Commerce) -> Result<Commerce, Box<dyn StdError + Send + Sync>>{
         match self.commerce_repository.create_commerce(valid_commerce).await {
             Ok(commerce_created) => Ok(commerce_created),
             Err(e) => Err(e.into()),
@@ -27,7 +27,7 @@ impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceServ
 
 impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceUseCase
 for CreateCommerceService<VC, CR> {
-    async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn Error>> {
+    async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn StdError + Send + Sync>> {
         let valid_commerce = self.validate_commerce_to_store_use_case
             .process(commerce).await?;
         self.create_commerce(&valid_commerce).await

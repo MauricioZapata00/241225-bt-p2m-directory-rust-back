@@ -1,5 +1,4 @@
 use serde::{Serialize, Deserialize};
-use crate::model::account::Account;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct BankStatus {

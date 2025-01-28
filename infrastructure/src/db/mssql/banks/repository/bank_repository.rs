@@ -5,7 +5,8 @@ use crate::db::mssql::banks::entity::bank_entity::BankEntity;
 
 #[async_trait]
 pub trait BankRepository {
-    async fn find_bank_by_bank_code(&self, bank_code: &String) -> Result<Option<BankEntity>, Error>;
+    async fn find_bank_by_bank_code(&self, bank_code: &String)
+        -> Result<Option<BankEntity>, Error>;
 
 }
 
@@ -27,7 +28,7 @@ impl BankRepository for SqlxBankRepository {
                 AND status_id = 1"
         )
             .bind(bank_code)
-            .fetch_optional(&self.pool)
+            .fetch_optional(&*self.pool)
             .await
     }
 }

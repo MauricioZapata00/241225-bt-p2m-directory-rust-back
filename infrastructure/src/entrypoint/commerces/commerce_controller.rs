@@ -1,4 +1,4 @@
-use std::error::Error;
+use std::error::Error as StdError;
 use rocket::{http::Status, serde::json::Json};
 use std::any::Any;
 use lazy_static::lazy_static;
@@ -41,66 +41,80 @@ impl<CC: CreateCommerceUseCase> CommerceController<CC> {
     }
 }
 
+// Define a custom trait that extends both Error and Any
+trait ErrorExt: StdError + Any + Send + Sync {
+    fn as_error(&self) -> &(dyn StdError + Send + Sync);
+}
+
+
+// Implement it for all types that implement both Error and Any
+impl<T: StdError + Any + Send + Sync> ErrorExt for T {
+    fn as_error(&self) -> &(dyn StdError + Send + Sync) {
+        self
+    }
+}
+// Define the error mapper function type
+type ErrorMapperFn = Box<dyn Fn(&(dyn ErrorExt + 'static))
+    -> (Status, Json<GenericResponse>) + Send + Sync>;
+
+
+
 lazy_static! {
-    static ref ERROR_MAPPER: HashMap<TypeId, fn(Box<dyn Error + Send + Sync>)
-    -> (Status, Json<GenericResponse>)> = {
+    static ref ERROR_MAPPER: HashMap<TypeId, ErrorMapperFn> = {
         let mut error_map = HashMap::new();
 
-        error_map.insert(
-            TypeId::of::<CommerceError>(),
-            |error| {
-                let commerce_error = error.downcast_ref::<CommerceError>().unwrap();
-                (
-                    Status::BadRequest,
-                    Json(GenericResponse::new(
-                        commerce_error.get_code(),
-                        String::from("ERROR"),
-                        commerce_error.get_message()
-                    ))
-                )
-            }
-        );
+        let commerce_handler: ErrorMapperFn = Box::new(|error| {
+            let commerce_error = error.downcast_ref::<CommerceError>().unwrap();
+            (
+                Status::BadRequest,
+                Json(GenericResponse::new(
+                    String::from(commerce_error.get_code()),
+                    String::from("ERROR"),
+                    String::from(commerce_error.get_message())
+                ))
+            )
+        });
 
-        error_map.insert(
-            TypeId::of::<BankError>(),
-            |error| {
-                let bank_error = error.downcast_ref::<BankError>().unwrap();
-                (
-                    Status::BadRequest,
-                    Json(GenericResponse::new(
-                        bank_error.get_code(),
-                        String::from("ERROR"),
-                        bank_error.get_message()
-                    ))
-                )
-            }
-        );
+        let bank_handler: ErrorMapperFn = Box::new(|error| {
+            let bank_error = error.downcast_ref::<BankError>().unwrap();
+            (
+                Status::BadRequest,
+                Json(GenericResponse::new(
+                    String::from(bank_error.get_code()),
+                    String::from("ERROR"),
+                    String::from(bank_error.get_message())
+                ))
+            )
+        });
 
-        error_map.insert(
-            TypeId::of::<DatabaseError>(),
-            |error| {
-                let db_error = error.downcast_ref::<DatabaseError>().unwrap();
-                (
-                    Status::ServiceUnavailable,
-                    Json(GenericResponse::new(
-                        String::from("ERR-UNKNOWN"),
-                        String::from("ERROR"),
-                        db_error.get_message()
-                    ))
-                )
-            }
-        );
+        let db_handler: ErrorMapperFn = Box::new(|error| {
+            let db_error = error.downcast_ref::<DatabaseError>().unwrap();
+            (
+                Status::ServiceUnavailable,
+                Json(GenericResponse::new(
+                    String::from("ERR-UNKNOWN"),
+                    String::from("ERROR"),
+                    String::from(db_error.get_message())
+                ))
+            )
+        });
+
+        error_map.insert(TypeId::of::<CommerceError>(), commerce_handler);
+        error_map.insert(TypeId::of::<BankError>(), bank_handler);
+        error_map.insert(TypeId::of::<DatabaseError>(), db_handler);
 
         error_map
     };
 }
 
-fn map_errors_to_responses(error: Box<dyn Error>)
+fn map_errors_to_responses(error: Box<dyn StdError + Send + Sync>)
     -> Result<(Status, Json<Commerce>), (Status, Json<GenericResponse>)> {
     // Use as_any() to get the TypeId
-    let type_id = error.as_any().type_id();
+    let error = error.as_ref();
+    let type_id = Any::type_id(error);
 
     if let Some(mapper_fn) = ERROR_MAPPER.get(&type_id) {
+        let error = &error as &(dyn ErrorExt + 'static);
         let (status, response) = mapper_fn(error);
         Err((status, response))
     } else {

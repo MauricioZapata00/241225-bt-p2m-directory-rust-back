@@ -5,9 +5,9 @@ use crate::db::mssql::commerces::entity::account_entity::AccountEntity;
 
 #[async_trait]
 pub trait AccountRepository {
-    async fn insert_new_account(&self, account_number: &String,
-                                bank_code: &String,
-                                bank_id: &i64)
+    async fn insert_new_account<'a>(&self, account_number: &'a String,
+                                bank_code: &'a String,
+                                bank_id: &'a i64)
                                 -> Result<Option<AccountEntity>, Error>;
 }
 
@@ -21,10 +21,11 @@ impl SqlxAccountRepository {
     }
 }
 
+#[async_trait]
 impl AccountRepository for SqlxAccountRepository {
-    async fn insert_new_account(&self, account_number: &String,
-                                bank_code: &String,
-                                bank_id: &i64)
+    async fn insert_new_account<'a>(&self, account_number: &'a String,
+                                bank_code: &'a String,
+                                bank_id: &'a i64)
                                 -> Result<Option<AccountEntity>, Error> {
         sqlx::query_as::<_, AccountEntity>(
             "INSERT INTO dbo.accounts (account_number, bank_code, bank_id)
@@ -34,7 +35,7 @@ impl AccountRepository for SqlxAccountRepository {
             .bind(account_number)
             .bind(bank_code)
             .bind(bank_id)
-            .fetch_optional(&self.pool)
+            .fetch_optional(&*self.pool)
             .await
     }
 }

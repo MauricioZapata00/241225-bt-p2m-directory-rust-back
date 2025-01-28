@@ -155,3 +155,6 @@ impl Error for CommerceError {
         self.get_message()
     }
 }
+
+unsafe impl Send for CommerceError {}
+unsafe impl Sync for CommerceError {}

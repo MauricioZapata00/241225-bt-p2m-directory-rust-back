@@ -20,14 +20,15 @@ impl SqlxCommerceStatusRepository {
     }
 }
 
+#[async_trait]
 impl CommerceStatusRepository for SqlxCommerceStatusRepository {
     async fn find_commerce_status_by_id(&self, commerce_status_id: &i64)
-        -> Result<Option<CommerceStatusEntity>, Error> {
+                                        -> Result<Option<CommerceStatusEntity>, Error> {
         sqlx::query_as::<_, CommerceStatusEntity>(
             "SELECT * FROM dbo.commerce_status WHERE commerce_status_id = @p1"
         )
             .bind(commerce_status_id)
-            .fetch_optional(&self.pool)
+            .fetch_optional(&*self.pool)
             .await
     }
 }

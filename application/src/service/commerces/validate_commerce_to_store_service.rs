@@ -1,5 +1,6 @@
-use std::error::Error;
+use std::error::Error as StdError;
 use std::sync::Arc;
+use lazy_static::lazy_static;
 use regex::Regex;
 use domain::exception::bank_error::BankError;
 use domain::exception::commerce_error::CommerceError;
@@ -11,12 +12,20 @@ use crate::use_case::commerces::validate_commerce_to_store::ValidateCommerceToSt
 
 const MIN_LENGTH: u8 = 3;
 const MAX_LENGTH: u8 = 25;
-const ALIAS_PATTERN: String = format!("^[A-Za-z0-9]{{{},{}}}", MIN_LENGTH, MAX_LENGTH);
-const ALIAS_REGEX: Regex = Regex::new(&ALIAS_PATTERN).unwrap();
-const RUC_PATTERN: String = String::from("^(?=.*\\d)[0-9-]{1,25}$");
-const RUC_REGEX: Regex = Regex::new(&RUC_PATTERN).unwrap();
-const ACCOUNT_NUMBER_PATTERN: String = String::from("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$");
-const ACCOUNT_NUMBER_REGEX: Regex = Regex::new(&RUC_PATTERN).unwrap();
+lazy_static! {
+    static ref ALIAS_REGEX: Regex = {
+        let pattern = format!("^[A-Za-z0-9]{{{},{}}}", MIN_LENGTH, MAX_LENGTH);
+        Regex::new(&pattern).unwrap()
+    };
+
+    static ref RUC_REGEX: Regex = {
+        Regex::new("^(?=.*\\d)[0-9-]{1,25}$").unwrap()
+    };
+
+    static ref ACCOUNT_NUMBER_REGEX: Regex = {
+        Regex::new("^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$").unwrap()
+    };
+}
 
 pub struct ValidateCommerceToStoreService<BR: BankRepositoryPort, CR: CommerceRepositoryPort> {
     bank_repository: Arc<BR>,
@@ -31,7 +40,7 @@ impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
         }
     }
 
-    async fn validate_commerce_logic(&self, commerce: &Commerce) -> Result<(), Box<dyn Error>> {
+    async fn validate_commerce_logic(&self, commerce: &Commerce) -> Result<(), Box<dyn StdError + Send + Sync>> {
         match self.commerce_repository
             .commerce_does_not_exist_by_ruc_and_alias(&commerce.ruc, &commerce.alias)
             .await
@@ -65,13 +74,13 @@ impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
 
 impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
 for ValidateCommerceToStoreService<BR, CR> {
-    async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn Error>> {
+    async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn StdError + Send + Sync>> {
         validate_commerce_field_formats(&commerce)?;
         let mut commerce_validated = commerce;
         commerce_validated.alias = format!("@{}", commerce_validated.alias);
         commerce_validated.legal_business_name = commerce_validated.legal_business_name.trim()
             .to_string();
-        self.validate_commerce_logic(&commerce_validated)?;
+        self.validate_commerce_logic(&commerce_validated).await?;
         Ok(commerce_validated)
     }
 }

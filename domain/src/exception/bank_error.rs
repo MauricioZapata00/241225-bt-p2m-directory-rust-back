@@ -64,3 +64,6 @@ impl Error for BankError {
         self.get_message()
     }
 }
+
+unsafe impl Send for BankError {}
+unsafe impl Sync for BankError {}
