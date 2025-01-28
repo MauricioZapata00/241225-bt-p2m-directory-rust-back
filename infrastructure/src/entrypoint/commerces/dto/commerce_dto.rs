@@ -3,7 +3,7 @@ use domain::exception::commerce_error::CommerceError;
 use domain::model::account::Account;
 use domain::model::commerce::Commerce;
 use domain::model::commerce_status::CommerceStatus;
-use crate::entrypoint::controller::commerces::dto::account_dto::AccountDto;
+use crate::entrypoint::commerces::dto::account_dto::AccountDto;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CommerceDto {

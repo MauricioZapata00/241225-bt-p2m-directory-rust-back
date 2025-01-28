@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use async_trait::async_trait;
 use sqlx::{AnyPool, Error};
 use crate::db::mssql::commerces::entity::commerce_status_entity::CommerceStatusEntity;
@@ -10,11 +11,11 @@ pub trait CommerceStatusRepository {
 }
 
 pub struct SqlxCommerceStatusRepository {
-    pool: AnyPool,
+    pool: Arc<AnyPool>,
 }
 
 impl SqlxCommerceStatusRepository {
-    pub fn new(pool: AnyPool) -> Self {
+    pub fn new(pool: Arc<AnyPool>) -> Self {
         Self { pool }
     }
 }

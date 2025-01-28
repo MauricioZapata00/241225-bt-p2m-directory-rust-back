@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use async_trait::async_trait;
 use sqlx::{AnyPool, Error};
 use crate::db::mssql::banks::repository::bank_repository::{BankRepository, SqlxBankRepository};
@@ -21,14 +22,14 @@ pub trait CommerceRepository {
 }
 
 pub struct SqlxCommerceRepository {
-    pool: AnyPool,
+    pool: Arc<AnyPool>,
     sqlx_account_repository: SqlxAccountRepository,
     sqlx_bank_repository: SqlxBankRepository,
     sqlx_commerce_status_repository: SqlxCommerceStatusRepository
 }
 
 impl SqlxCommerceRepository {
-    pub fn new(pool: AnyPool,
+    pub fn new(pool: Arc<AnyPool>,
                sqlx_account_repository: SqlxAccountRepository,
                sqlx_bank_repository: SqlxBankRepository,
                sqlx_commerce_status_repository: SqlxCommerceStatusRepository) -> Self {
