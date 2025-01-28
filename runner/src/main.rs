@@ -19,7 +19,17 @@ use infrastructure::db::mssql::commerces::repository::commerce_status_repository
 use infrastructure::entrypoint::commerces::commerce_controller::CommerceController;
 use infrastructure::entrypoint::commerces::dto::commerce_dto::CommerceDto;
 
-type AppCommerceController = CommerceController<dyn CreateCommerceUseCase>;
+type BankRepo = BankRepositoryAdapter;
+type CommerceRepo = CommerceRepositoryAdapter;
+
+// ValidateCommerceToStoreService with its concrete types
+type ValidateService = ValidateCommerceToStoreService<BankRepo, CommerceRepo>;
+
+// CreateCommerceService with its concrete types
+type CreateService = CreateCommerceService<ValidateService, CommerceRepo>;
+
+// Finally, the CommerceController with the concrete CreateCommerceService
+type AppCommerceController = CommerceController<CreateService>;
 
 struct AppState {
     commerce_controller: AppCommerceController

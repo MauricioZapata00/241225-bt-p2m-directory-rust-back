@@ -10,4 +10,3 @@ rocket = { version = "0.5.1", features = ["json"] }
 serde = { version = "1.0.216", features = ["derive"] }
 sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-native-tls" ] }
 async-trait = "0.1.85"
-lazy_static = "1.5.0"
