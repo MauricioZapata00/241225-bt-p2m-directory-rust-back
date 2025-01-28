@@ -10,6 +10,12 @@
 /target
 /debug
 
+#Secrets
+.env*.local
+.env
+
+Secrets.toml
+
 # Generated databases
 db.sqlite
 db.sqlite-shm

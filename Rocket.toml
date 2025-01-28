@@ -1,0 +1,2 @@
+[default]
+database_url = "jdbc:sqlserver://localhost:1433"
