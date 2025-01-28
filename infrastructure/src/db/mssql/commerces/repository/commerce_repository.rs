@@ -23,16 +23,16 @@ pub trait CommerceRepository {
 
 pub struct SqlxCommerceRepository {
     pool: Arc<AnyPool>,
-    sqlx_account_repository: SqlxAccountRepository,
-    sqlx_bank_repository: SqlxBankRepository,
-    sqlx_commerce_status_repository: SqlxCommerceStatusRepository
+    sqlx_account_repository: Arc<SqlxAccountRepository>,
+    sqlx_bank_repository: Arc<SqlxBankRepository>,
+    sqlx_commerce_status_repository: Arc<SqlxCommerceStatusRepository>
 }
 
 impl SqlxCommerceRepository {
     pub fn new(pool: Arc<AnyPool>,
-               sqlx_account_repository: SqlxAccountRepository,
-               sqlx_bank_repository: SqlxBankRepository,
-               sqlx_commerce_status_repository: SqlxCommerceStatusRepository) -> Self {
+               sqlx_account_repository: Arc<SqlxAccountRepository>,
+               sqlx_bank_repository: Arc<SqlxBankRepository>,
+               sqlx_commerce_status_repository: Arc<SqlxCommerceStatusRepository>) -> Self {
         Self { pool,
             sqlx_account_repository,
             sqlx_bank_repository,

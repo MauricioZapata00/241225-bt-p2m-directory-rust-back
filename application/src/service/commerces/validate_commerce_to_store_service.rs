@@ -1,4 +1,5 @@
 use std::error::Error;
+use std::sync::Arc;
 use regex::Regex;
 use domain::exception::bank_error::BankError;
 use domain::exception::commerce_error::CommerceError;
@@ -18,12 +19,12 @@ const ACCOUNT_NUMBER_PATTERN: String = String::from("^[0-9a-fA-F]{8}-[0-9a-fA-F]
 const ACCOUNT_NUMBER_REGEX: Regex = Regex::new(&RUC_PATTERN).unwrap();
 
 pub struct ValidateCommerceToStoreService<BR: BankRepositoryPort, CR: CommerceRepositoryPort> {
-    bank_repository: BR,
-    commerce_repository: CR
+    bank_repository: Arc<BR>,
+    commerce_repository: Arc<CR>
 }
 
 impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStoreService<BR, CR> {
-    pub fn new(bank_repository: BR, commerce_repository: CR) -> Self {
+    pub fn new(bank_repository: Arc<BR>, commerce_repository: Arc<CR>) -> Self {
         Self {
             bank_repository,
             commerce_repository

@@ -1,16 +1,17 @@
 use std::error::Error;
+use std::sync::Arc;
 use domain::model::commerce::Commerce;
 use crate::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
 use crate::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
 use crate::use_case::commerces::validate_commerce_to_store::ValidateCommerceToStore;
 
 pub struct CreateCommerceService<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> {
-    validate_commerce_to_store_use_case: VC,
-    commerce_repository: CR
+    validate_commerce_to_store_use_case: Arc<VC>,
+    commerce_repository: Arc<CR>
 }
 
 impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceService<VC, CR> {
-    pub fn new(validate_commerce_to_store_use_case: VC, commerce_repository: CR) -> Self {
+    pub fn new(validate_commerce_to_store_use_case: Arc<VC>, commerce_repository: Arc<CR>) -> Self {
         Self {
             validate_commerce_to_store_use_case,
             commerce_repository

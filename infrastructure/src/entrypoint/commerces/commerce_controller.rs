@@ -4,6 +4,7 @@ use std::any::Any;
 use lazy_static::lazy_static;
 use std::collections::HashMap;
 use std::any::TypeId;
+use std::sync::Arc;
 use application::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
 use domain::exception::bank_error::BankError;
 use domain::exception::commerce_error::CommerceError;
@@ -13,11 +14,11 @@ use domain::model::generic_response::GenericResponse;
 use crate::entrypoint::commerces::dto::commerce_dto::CommerceDto;
 
 pub struct CommerceController<CC: CreateCommerceUseCase> {
-    create_commerce_use_case: CC
+    create_commerce_use_case: Arc<CC>
 }
 
 impl<CC: CreateCommerceUseCase> CommerceController<CC> {
-    pub fn new(create_commerce_use_case: CC) -> Self {
+    pub fn new(create_commerce_use_case: Arc<CC>) -> Self {
         Self {
             create_commerce_use_case
         }

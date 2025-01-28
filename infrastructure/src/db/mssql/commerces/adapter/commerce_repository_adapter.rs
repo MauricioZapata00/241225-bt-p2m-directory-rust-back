@@ -1,3 +1,4 @@
+use std::sync::Arc;
 use application::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
 use domain::exception::database_error::DatabaseError;
 use domain::model::account::Account;
@@ -8,11 +9,11 @@ use crate::db::mssql::commerces::entity::wrappers::commerce_db_info_wrapper::Com
 use crate::db::mssql::commerces::repository::commerce_repository::{CommerceRepository, SqlxCommerceRepository};
 
 pub struct CommerceRepositoryAdapter {
-    commerce_repository: SqlxCommerceRepository
+    commerce_repository: Arc<SqlxCommerceRepository>
 }
 
 impl CommerceRepositoryAdapter {
-    pub fn new(commerce_repository: SqlxCommerceRepository) -> Self {
+    pub fn new(commerce_repository: Arc<SqlxCommerceRepository>) -> Self {
         Self { commerce_repository }
     }
 }

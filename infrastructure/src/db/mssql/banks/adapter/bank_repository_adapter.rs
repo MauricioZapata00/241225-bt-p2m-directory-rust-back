@@ -1,13 +1,14 @@
+use std::sync::Arc;
 use application::port::db::banks::bank_repository_port::BankRepositoryPort;
 use domain::exception::database_error::DatabaseError;
 use crate::db::mssql::banks::repository::bank_repository::{BankRepository, SqlxBankRepository};
 
 pub struct BankRepositoryAdapter {
-    bank_repository: SqlxBankRepository
+    bank_repository: Arc<SqlxBankRepository>
 }
 
 impl BankRepositoryAdapter {
-    pub fn new(bank_repository: SqlxBankRepository) -> Self {
+    pub fn new(bank_repository: Arc<SqlxBankRepository>) -> Self {
         Self { bank_repository }
     }
 }
