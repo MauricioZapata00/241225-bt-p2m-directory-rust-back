@@ -1,11 +1,11 @@
-use serde::{Serialize, Deserialize};
+use rocket::serde::{Deserialize as RocketDeserialize, Serialize as RocketSerialize};
 use domain::exception::commerce_error::CommerceError;
 use domain::model::account::Account;
 use domain::model::commerce::Commerce;
 use domain::model::commerce_status::CommerceStatus;
 use crate::entrypoint::commerces::dto::account_dto::AccountDto;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, RocketSerialize, RocketDeserialize)]
 pub struct CommerceDto {
     #[serde(rename = "commerceId")]
     pub commerce_id: Option<i64>,
@@ -92,9 +92,29 @@ impl CommerceDto {
             CommerceStatus::new(String::from("")),
         ))
     }
-
-
 }
+
+// #[rocket::async_trait]
+// impl<'r> FromRequest<'r> for CommerceDto {
+//     type Error = String;
+//
+//     async fn from_request(request: &'r Request<'_>) -> Outcome<Self, Self::Error> {
+//         // First check content type
+//         match request.content_type() {
+//             Some(ct) if ct.is_json() => {
+//                 Outcome::Success(request.headers().get_one("Content-Type").::<Json<CommerceDto>>().await)
+//             }
+//             Some(_) => Outcome::Error((
+//                 Status::UnsupportedMediaType,
+//                 "Content-Type must be application/json".to_string(),
+//             )),
+//             None => Outcome::Error((
+//                 Status::BadRequest,
+//                 "Content-Type header missing".to_string(),
+//             )),
+//         }
+//     }
+// }
 
 fn validate_long_number(number: Option<i64>) -> Result<(), CommerceError> {
     number.filter(|&id| id > 0)
