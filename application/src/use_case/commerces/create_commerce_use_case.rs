@@ -1,4 +1,4 @@
-use std::error::{Error as StdError, Error};
+use std::error::{Error as StdError};
 use domain::model::commerce::Commerce;
 
 pub trait CreateCommerceUseCase {

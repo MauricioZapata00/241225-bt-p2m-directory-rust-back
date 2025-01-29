@@ -3,7 +3,7 @@ extern crate rocket;
 
 use std::env;
 use std::sync::Arc;
-use rocket::{State, http::Status, response::status, serde::json::Json};
+use rocket::{State, http::Status, serde::json::Json};
 use sqlx::AnyPool;
 use application::service::commerces::create_commerce_service::CreateCommerceService;
 use application::service::commerces::validate_commerce_to_store_service::ValidateCommerceToStoreService;
