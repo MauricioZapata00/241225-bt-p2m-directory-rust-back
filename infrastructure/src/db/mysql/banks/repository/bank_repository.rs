@@ -1,7 +1,7 @@
 use std::sync::Arc;
-use sqlx::{Error, AnyPool};
+use sqlx::{Error, MySqlPool};
 use async_trait::async_trait;
-use crate::db::mssql::banks::entity::bank_entity::BankEntity;
+use crate::db::mysql::banks::entity::bank_entity::BankEntity;
 
 #[async_trait]
 pub trait BankRepository {
@@ -11,11 +11,11 @@ pub trait BankRepository {
 }
 
 pub struct SqlxBankRepository {
-    pool: Arc<AnyPool>,
+    pool: Arc<MySqlPool>,
 }
 
 impl SqlxBankRepository {
-    pub fn new(pool: Arc<AnyPool>) -> Self {
+    pub fn new(pool: Arc<MySqlPool>) -> Self {
         Self { pool }
     }
 }
@@ -24,7 +24,7 @@ impl SqlxBankRepository {
 impl BankRepository for SqlxBankRepository {
     async fn find_bank_by_bank_code(&self, bank_code: &String) -> Result<Option<BankEntity>, Error> {
         sqlx::query_as::<_, BankEntity>(
-            "SELECT * FROM dbo.banks WHERE bank_code = @p1
+            "SELECT * FROM banks WHERE bank_code = ?
                 AND status_id = 1"
         )
             .bind(bank_code)

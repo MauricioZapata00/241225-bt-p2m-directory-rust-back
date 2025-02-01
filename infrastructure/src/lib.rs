@@ -1,5 +1,5 @@
 pub mod db {
-    pub mod mssql {
+    pub mod mysql {
         pub mod banks {
             pub mod adapter {
                 pub mod bank_repository_adapter;

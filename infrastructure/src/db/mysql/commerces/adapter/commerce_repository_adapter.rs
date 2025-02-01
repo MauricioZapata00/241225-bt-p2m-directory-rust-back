@@ -4,9 +4,9 @@ use domain::exception::database_error::DatabaseError;
 use domain::model::account::Account;
 use domain::model::commerce::Commerce;
 use domain::model::commerce_status::CommerceStatus;
-use crate::db::mssql::commerces::entity::commerce_entity::CommerceEntity;
-use crate::db::mssql::commerces::entity::wrappers::commerce_db_info_wrapper::CommerceDbInfoWrapper;
-use crate::db::mssql::commerces::repository::commerce_repository::{CommerceRepository, SqlxCommerceRepository};
+use crate::db::mysql::commerces::entity::commerce_entity::CommerceEntity;
+use crate::db::mysql::commerces::entity::wrappers::commerce_db_info_wrapper::CommerceDbInfoWrapper;
+use crate::db::mysql::commerces::repository::commerce_repository::{CommerceRepository, SqlxCommerceRepository};
 
 pub struct CommerceRepositoryAdapter {
     commerce_repository: Arc<SqlxCommerceRepository>

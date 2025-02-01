@@ -1,12 +1,12 @@
 use std::sync::Arc;
 use async_trait::async_trait;
-use sqlx::{AnyPool, Error};
-use crate::db::mssql::banks::repository::bank_repository::{BankRepository, SqlxBankRepository};
-use crate::db::mssql::commerces::entity::account_entity::AccountEntity;
-use crate::db::mssql::commerces::entity::commerce_entity::CommerceEntity;
-use crate::db::mssql::commerces::entity::wrappers::commerce_db_info_wrapper::CommerceDbInfoWrapper;
-use crate::db::mssql::commerces::repository::account_repository::{AccountRepository, SqlxAccountRepository};
-use crate::db::mssql::commerces::repository::commerce_status_repository::{CommerceStatusRepository, SqlxCommerceStatusRepository};
+use sqlx::{Error, MySqlPool};
+use crate::db::mysql::banks::repository::bank_repository::{BankRepository, SqlxBankRepository};
+use crate::db::mysql::commerces::entity::account_entity::AccountEntity;
+use crate::db::mysql::commerces::entity::commerce_entity::CommerceEntity;
+use crate::db::mysql::commerces::entity::wrappers::commerce_db_info_wrapper::CommerceDbInfoWrapper;
+use crate::db::mysql::commerces::repository::account_repository::{AccountRepository, SqlxAccountRepository};
+use crate::db::mysql::commerces::repository::commerce_status_repository::{CommerceStatusRepository, SqlxCommerceStatusRepository};
 
 #[async_trait]
 pub trait CommerceRepository {
@@ -22,14 +22,14 @@ pub trait CommerceRepository {
 }
 
 pub struct SqlxCommerceRepository {
-    pool: Arc<AnyPool>,
+    pool: Arc<MySqlPool>,
     sqlx_account_repository: Arc<SqlxAccountRepository>,
     sqlx_bank_repository: Arc<SqlxBankRepository>,
     sqlx_commerce_status_repository: Arc<SqlxCommerceStatusRepository>
 }
 
 impl SqlxCommerceRepository {
-    pub fn new(pool: Arc<AnyPool>,
+    pub fn new(pool: Arc<MySqlPool>,
                sqlx_account_repository: Arc<SqlxAccountRepository>,
                sqlx_bank_repository: Arc<SqlxBankRepository>,
                sqlx_commerce_status_repository: Arc<SqlxCommerceStatusRepository>) -> Self {
@@ -47,6 +47,21 @@ impl SqlxCommerceRepository {
         match account_entity {
             None => Err(Error::RowNotFound),
             Some(account_inserted) => {
+                let mut tx = self.pool.begin().await?;
+
+                // Insert the commerce and get the inserted ID
+                sqlx::query(
+                    "INSERT INTO commerces (alias, alias_type_id, legal_business_name, account_id,
+                              ruc, commerce_status_id)
+                     VALUES (?, ?, ?, ?, ?, 1)"
+                )
+                    .bind(&commerce_entity.alias)
+                    .bind(&commerce_entity.alias_type_id)
+                    .bind(&commerce_entity.legal_business_name)
+                    .bind(&account_inserted.account_id)
+                    .bind(&commerce_entity.ruc)
+                    .execute(&mut *tx)
+                    .await?;
                 let commerce_entity_stored = sqlx::query_as::<_, CommerceEntity>(
                     "INSERT INTO dbo.commerces (alias, alias_type_id, legal_business_name, account_id,
                               ruc, commerce_status_id)
@@ -60,9 +75,22 @@ impl SqlxCommerceRepository {
                     .bind(&commerce_entity.ruc)
                     .fetch_optional(&*self.pool)
                     .await?.unwrap();
+
+                // Fetch the inserted commerce
+                let commerce_entity_stored = sqlx::query_as::<_, CommerceEntity>(
+                    "SELECT * FROM commerces WHERE id_commerce = LAST_INSERT_ID()"
+                )
+                    .fetch_optional(&mut *tx)
+                    .await?
+                    .unwrap();
+
                 let commerce_status_entity = self
                     .sqlx_commerce_status_repository
-                    .find_commerce_status_by_id(&1).await?;
+                    .find_commerce_status_by_id(&1)
+                    .await?;
+
+                tx.commit().await?;
+
                 Ok(Option::from(CommerceDbInfoWrapper {
                     id_commerce: commerce_entity_stored.id_commerce,
                     alias: commerce_entity_stored.alias.clone(),
@@ -87,8 +115,8 @@ impl CommerceRepository for SqlxCommerceRepository {
         -> Result<Option<CommerceEntity>, Error> {
         let alias_with_at_sign = format!("@{}", alias_value);
         sqlx::query_as::<_, CommerceEntity>(
-            "SELECT * FROM dbo.commerces WHERE ruc = @p1
-                OR alias = @p2 AND commerce_status_id = 1"
+            "SELECT * FROM commerces WHERE (ruc = ?
+                OR alias = ?) AND commerce_status_id = 1 FOR UPDATE"
         )
             .bind(ruc)
             .bind(&alias_with_at_sign)
@@ -100,8 +128,8 @@ impl CommerceRepository for SqlxCommerceRepository {
                                                          legal_business_name: &'a String)
         -> Result<Option<CommerceEntity>, Error> {
         sqlx::query_as::<_, CommerceEntity>(
-            "SELECT * FROM dbo.commerces WHERE ruc = @p1
-                OR legal_business_name = @p2 AND commerce_status_id = 1"
+            "SELECT * FROM commerces WHERE (ruc = ?
+                OR legal_business_name = ?) AND commerce_status_id = 1 FOR UPDATE"
         )
             .bind(ruc)
             .bind(legal_business_name)

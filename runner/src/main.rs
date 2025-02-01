@@ -3,19 +3,21 @@ extern crate rocket;
 
 use std::env;
 use std::sync::Arc;
+use std::time::Duration;
 use rocket::{State, http::Status, serde::json::Json};
-use sqlx::AnyPool;
+use sqlx::mysql::{MySqlPool, MySqlPoolOptions};
+use rocket::figment::Figment;
 use application::service::commerces::create_commerce_service::CreateCommerceService;
 use application::service::commerces::validate_commerce_to_store_service::ValidateCommerceToStoreService;
 use application::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
 use domain::model::commerce::Commerce;
 use domain::model::generic_response::GenericResponse;
-use infrastructure::db::mssql::banks::adapter::bank_repository_adapter::BankRepositoryAdapter;
-use infrastructure::db::mssql::banks::repository::bank_repository::SqlxBankRepository;
-use infrastructure::db::mssql::commerces::adapter::commerce_repository_adapter::CommerceRepositoryAdapter;
-use infrastructure::db::mssql::commerces::repository::account_repository::SqlxAccountRepository;
-use infrastructure::db::mssql::commerces::repository::commerce_repository::SqlxCommerceRepository;
-use infrastructure::db::mssql::commerces::repository::commerce_status_repository::SqlxCommerceStatusRepository;
+use infrastructure::db::mysql::banks::adapter::bank_repository_adapter::BankRepositoryAdapter;
+use infrastructure::db::mysql::banks::repository::bank_repository::SqlxBankRepository;
+use infrastructure::db::mysql::commerces::adapter::commerce_repository_adapter::CommerceRepositoryAdapter;
+use infrastructure::db::mysql::commerces::repository::account_repository::SqlxAccountRepository;
+use infrastructure::db::mysql::commerces::repository::commerce_repository::SqlxCommerceRepository;
+use infrastructure::db::mysql::commerces::repository::commerce_status_repository::SqlxCommerceStatusRepository;
 use infrastructure::entrypoint::commerces::commerce_controller::CommerceController;
 use infrastructure::entrypoint::commerces::dto::commerce_dto::CommerceDto;
 
@@ -32,17 +34,30 @@ struct AppState {
     commerce_controller: AppCommerceController
 }
 
+async fn create_db_pool(figment: &Figment) -> Result<MySqlPool, sqlx::Error> {
+    let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
+        figment
+            .extract_inner("database_url")
+            .expect("database_url configuration missing")
+    });
+
+    MySqlPoolOptions::new()
+        .max_connections(5)               // Maximum number of connections in the pool
+        .min_connections(1)                // Minimum number of idle connections to maintain
+        .acquire_timeout(Duration::from_secs(3))     // Maximum time to wait for a connection
+        .idle_timeout(Duration::from_secs(8))        // How long to keep an idle connection
+        .max_lifetime(Duration::from_secs(30))       // Maximum lifetime of a connection
+        .connect(&database_url)
+        .await
+}
+
 impl AppState {
     async fn new() -> Self {
         let figment = rocket::Config::figment();
 
-        let database_url = env::var("DATABASE_URL").unwrap_or_else(|_| {
-            figment
-                .extract_inner("database_url")
-                .expect("database_url configuration missing")
-        });
 
-        let pool = AnyPool::connect(&database_url)
+
+        let pool = create_db_pool(&figment)
             .await
             .expect("Failed to create pool");
 

@@ -7,6 +7,6 @@ edition = "2021"
 domain = { path = "../domain" }
 application = { path = "../application" }
 rocket = { version = "0.5.1", features = ["json"] }
-serde = { version = "1.0.216", features = ["derive"] }
-sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-native-tls" ] }
+serde = { version = "1.0.217", features = ["derive"] }
+sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-native-tls", "mysql" ] }
 async-trait = "0.1.85"

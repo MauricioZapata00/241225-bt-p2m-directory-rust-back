@@ -1,2 +1,3 @@
 [default]
-database_url = "jdbc:sqlserver://localhost:1433"
+#database_url = "jdbc:sqlserver://localhost:1433"
+database_url = "mysql://root:emx2bPxI52jUe133GWlkHoyESLzQ@localhost:3307/bt-p2m-directory"
