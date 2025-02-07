@@ -19,7 +19,7 @@ lazy_static! {
     };
 
     static ref RUC_REGEX: Regex = {
-        Regex::new("^(?=.*\\d)[0-9-]{1,25}$").unwrap()
+        Regex::new("^[0-9-]{1,25}$").unwrap()
     };
 
     static ref ACCOUNT_NUMBER_REGEX: Regex = {
@@ -45,8 +45,8 @@ impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
             .commerce_does_not_exist_by_ruc_and_alias(&commerce.ruc, &commerce.alias)
             .await
         {
-            Ok(true) => return Err(CommerceError::alias_already_exists().into()),
-            Ok(false) => (),
+            Ok(true) => (),
+            Ok(false) => return Err(CommerceError::alias_already_exists().into()),
             Err(e) => return Err(e.into()),
         }
 
