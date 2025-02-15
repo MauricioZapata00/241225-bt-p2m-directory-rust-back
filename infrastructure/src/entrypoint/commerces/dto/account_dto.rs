@@ -1,5 +1,5 @@
+use std::fmt;
 use rocket::serde::{Deserialize as RocketDeserialize, Serialize as RocketSerialize};
-
 
 #[derive(Debug, Clone, RocketSerialize, RocketDeserialize)]
 pub struct AccountDto {
@@ -16,5 +16,16 @@ impl AccountDto {
             account_number,
             bank_code,
         }
+    }
+}
+
+impl fmt::Display for AccountDto {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "Account {{ number: {}, bank_code: {} }}",
+            self.account_number,
+            self.bank_code
+        )
     }
 }
