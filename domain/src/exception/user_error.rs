@@ -1,5 +1,6 @@
 use std::error::Error;
 use std::fmt;
+use tracing::error;
 use crate::exception::error_attributes::ErrorAttributes;
 
 #[derive(Debug)]
@@ -21,6 +22,7 @@ pub enum UserError {
 
 impl UserError {
     pub fn debtor_null() -> Self {
+        error!("Debtor user is null");
         UserError::DebtorNull(ErrorAttributes::new(
             String::from("ERR-076"),
             String::from("Debitor nulo o vacio"),
@@ -28,6 +30,7 @@ impl UserError {
     }
 
     pub fn debtor_not_found() -> Self {
+        error!("Debtor user is not found");
         UserError::DebtorNotFound(ErrorAttributes::new(
             String::from("ERR-034"),
             String::from("Debitor no encontrado"),
@@ -35,6 +38,7 @@ impl UserError {
     }
 
     pub fn creditor_not_found() -> Self {
+        error!("Creditor user is not found");
         UserError::CreditorNotFound(ErrorAttributes::new(
             String::from("ERR-035"),
             String::from("Creditor no encontrado"),
@@ -42,6 +46,7 @@ impl UserError {
     }
 
     pub fn debtor_invalid_alias_type() -> Self {
+        error!("Debtor user has not valid alias type");
         UserError::DebtorInvalidAliasType(ErrorAttributes::new(
             String::from("ERR-077"),
             String::from("Tipo de alias invalido para debitor"),
@@ -49,6 +54,7 @@ impl UserError {
     }
 
     pub fn debtor_invalid_alias() -> Self {
+        error!("Debtor user has invalid alias");
         UserError::DebtorInvalidAlias(ErrorAttributes::new(
             String::from("ERR-078"),
             String::from("Formato de alias invalido para debitor"),
@@ -56,6 +62,7 @@ impl UserError {
     }
 
     pub fn debtor_invalid_country_code() -> Self {
+        error!("Debtor user has invalid country code");
         UserError::DebtorInvalidCountryCode(ErrorAttributes::new(
             String::from("ERR-079"),
             String::from("Codigo de pais invalido para debitor"),
@@ -63,6 +70,7 @@ impl UserError {
     }
 
     pub fn bank_code_null_or_empty_for_debtor() -> Self {
+        error!("Bank code null or empty for debtor");
         UserError::BankCodeNullOrEmptyForDebtor(ErrorAttributes::new(
             String::from("ERR-080"),
             String::from("El código del banco es nulo o vacio para el debitor"),
@@ -70,6 +78,7 @@ impl UserError {
     }
 
     pub fn bank_code_error_value() -> Self {
+        error!("Invalid bank code format");
         UserError::BankCodeErrorValue(ErrorAttributes::new(
             String::from("ERR-087"),
             String::from("Formato de codigo de banco invalido"),
@@ -77,6 +86,7 @@ impl UserError {
     }
 
     pub fn debtor_inactive() -> Self {
+        error!("Debtor user is inactive");
         UserError::DebtorInactive(ErrorAttributes::new(
             String::from("ERR-094"),
             String::from("Alias debitor inactivo"),
@@ -84,6 +94,7 @@ impl UserError {
     }
 
     pub fn creditor_null() -> Self {
+        error!("Creditor user is null");
         UserError::CreditorNull(ErrorAttributes::new(
             String::from("ERR-081"),
             String::from("Creditor nulo o vacio"),
@@ -91,6 +102,7 @@ impl UserError {
     }
 
     pub fn creditor_invalid_alias_type() -> Self {
+        error!("Creditor user has invalid alias type");
         UserError::CreditorInvalidAliasType(ErrorAttributes::new(
             String::from("ERR-082"),
             String::from("Tipo de alias invalido para creditor"),
@@ -98,6 +110,7 @@ impl UserError {
     }
 
     pub fn creditor_invalid_alias() -> Self {
+        error!("Creditor user has invalid alias");
         UserError::CreditorInvalidAlias(ErrorAttributes::new(
             String::from("ERR-083"),
             String::from("Formato de alias invalido para creditor"),
@@ -105,6 +118,7 @@ impl UserError {
     }
 
     pub fn creditor_invalid_country_code() -> Self {
+        error!("Creditor user has invalid country code");
         UserError::CreditorInvalidCountryCode(ErrorAttributes::new(
             String::from("ERR-084"),
             String::from("Codigo de pais invalido para creditor"),

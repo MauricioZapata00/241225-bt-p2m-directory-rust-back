@@ -1,4 +1,5 @@
 use rocket::serde::{Deserialize as RocketDeserialize, Serialize as RocketSerialize};
+use tracing::info;
 use domain::exception::commerce_error::CommerceError;
 use domain::model::account::Account;
 use domain::model::commerce::Commerce;
@@ -67,10 +68,15 @@ impl CommerceDto {
             .ok_or_else(|| CommerceError::not_valid_ruc())?;
 
         // Now validate the values themselves
+        info!("Validating commerce alias type: {}", commerce_alias_type);
         validate_long_number(Some(commerce_alias_type))?;
+        info!("Validating alias value: {}", alias);
         validate_null_string_value(alias, CommerceError::not_valid_alias_format)?;
+        info!("Validating commerce legal business name: {}", alias);
         validate_null_string_value(commerce_legal_business_name, CommerceError::not_valid_legal_business)?;
+        info!("Validating account_dto: {}", account);
         validate_account(account)?;
+        info!("Validating commerce ruc value: {}", commerce_ruc);
         validate_null_string_value(commerce_ruc, CommerceError::not_valid_ruc)?;
 
 
@@ -102,9 +108,11 @@ fn validate_long_number(number: Option<i64>) -> Result<(), CommerceError> {
 
 fn validate_account(account: &AccountDto) -> Result<(), CommerceError> {
     // Validate account number
+    info!("Validating account_number'{}'", account.account_number);
     validate_null_string_value(&account.account_number, CommerceError::not_valid_account_format)?;
 
     // Validate bank code
+    info!("Validating bank_code'{}'", account.bank_code);
     validate_null_string_value(&account.bank_code, CommerceError::bank_code_is_empty_or_null)?;
 
     Ok(())

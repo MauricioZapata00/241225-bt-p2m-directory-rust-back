@@ -1,5 +1,6 @@
 use std::error::Error as StdError;
 use std::sync::Arc;
+use tracing::{error, info, instrument};
 use domain::model::commerce::Commerce;
 use crate::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
 use crate::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
@@ -28,8 +29,18 @@ impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceServ
 impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceUseCase
 for CreateCommerceService<VC, CR> {
     async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn StdError + Send + Sync>> {
-        let valid_commerce = self.validate_commerce_to_store_use_case
-            .process(commerce).await?;
+        let valid_commerce = match self.validate_commerce_to_store_use_case
+            .process(commerce).await {
+            Ok(commerce_validated) => {
+                info!("Commerce {:?} validated successfully", commerce_validated);
+                Ok(commerce_validated)
+            },
+            Err(e) => {
+                error!("Unable to validate commerce, error is: {:?}", e);
+                Err(e)
+            }
+        };
+
         self.create_commerce(&valid_commerce).await
     }
 }

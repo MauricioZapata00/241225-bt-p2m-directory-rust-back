@@ -7,6 +7,8 @@ use std::time::Duration;
 use rocket::{State, http::Status, serde::json::Json};
 use sqlx::mysql::{MySqlPool, MySqlPoolOptions};
 use rocket::figment::Figment;
+use tracing_subscriber::FmtSubscriber;
+use tracing::{info, Level};
 use application::service::commerces::create_commerce_service::CreateCommerceService;
 use application::service::commerces::validate_commerce_to_store_service::ValidateCommerceToStoreService;
 use application::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
@@ -115,6 +117,18 @@ async fn store_commerce(state: &State<AppState>, commerce: Json<CommerceDto>)
 
 #[launch]
 async fn rocket() -> _ {
+
+
+    let subscriber = FmtSubscriber::builder()
+        .with_max_level(Level::INFO)
+        .finish();
+
+    tracing::subscriber::set_global_default(subscriber)
+        .expect("Setting default subscriber failed");
+    info!("Logging initialized");
+    info!("Initializing app...");
+
+
     let state = AppState::new().await;
     let config = rocket::Config::figment()
         .merge(("port", 8008))

@@ -1,6 +1,7 @@
 use crate::exception::error_attributes::ErrorAttributes;
 use std::fmt;
 use std::error::Error;
+use tracing::error;
 
 #[derive(Debug)]
 pub enum BankError {
@@ -11,6 +12,7 @@ pub enum BankError {
 
 impl BankError {
     pub fn creditor_bank_not_active() -> Self {
+        error!("Creditor bank is currently not active");
         BankError::CreditorBankNotActive(ErrorAttributes::new(
             String::from("ERR-088"),
             String::from("Banco de alias commerce no se encuentra activo"),
@@ -18,6 +20,7 @@ impl BankError {
     }
 
     pub fn creditor_bank_not_found() -> Self {
+        error!("Creditor bank is not found");
         BankError::CreditorBankNotFound(ErrorAttributes::new(
             String::from("ERR-002"),
             String::from("Banco no encontrado"),
@@ -25,6 +28,7 @@ impl BankError {
     }
 
     pub fn debtor_bank_not_active() -> Self {
+        error!("Debtor bank is not active");
         BankError::DebtorBankNotActive(ErrorAttributes::new(
             String::from("ERR-024"),
             String::from("Banco de alias debitor no se encuentra activo"),

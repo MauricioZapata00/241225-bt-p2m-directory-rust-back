@@ -8,4 +8,6 @@ domain = { path = "../domain" }
 application = { path = "../application" }
 infrastructure = { path = "../infrastructure" }
 rocket = { version = "0.5.1", features = ["json", "serde_json"] }
+tracing = "0.1.41"
+tracing-subscriber = "0.3.19"
 sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-native-tls", "mysql" ] }
