@@ -1,6 +1,7 @@
 use std::sync::Arc;
 use async_trait::async_trait;
 use sqlx::{Error, MySqlPool};
+use tracing::info;
 use crate::db::mysql::banks::repository::bank_repository::{BankRepository, SqlxBankRepository};
 use crate::db::mysql::commerces::entity::account_entity::AccountEntity;
 use crate::db::mysql::commerces::entity::commerce_entity::CommerceEntity;
@@ -50,10 +51,12 @@ impl SqlxCommerceRepository {
                 let mut tx = self.pool.begin().await?;
 
                 // Insert the commerce and get the inserted ID
+                info!("Inserting commerce_entity: {:?}", commerce_entity);
+
                 sqlx::query(
                     "INSERT INTO commerces (alias, alias_type_id, legal_business_name, account_id,
                               ruc, commerce_status_id)
-                     VALUES (?, ?, ?, ?, ?, 1)"
+                        VALUES (@p1, @p2, @p3, @p4, @p5, 1);"
                 )
                     .bind(&commerce_entity.alias)
                     .bind(&commerce_entity.alias_type_id)
@@ -62,19 +65,6 @@ impl SqlxCommerceRepository {
                     .bind(&commerce_entity.ruc)
                     .execute(&mut *tx)
                     .await?;
-                let commerce_entity_stored = sqlx::query_as::<_, CommerceEntity>(
-                    "INSERT INTO dbo.commerces (alias, alias_type_id, legal_business_name, account_id,
-                              ruc, commerce_status_id)
-            OUTPUT INSERTED.*
-             VALUES (@p1, @p2, @p3, @p4, @p5, 1);"
-                )
-                    .bind(&commerce_entity.alias)
-                    .bind(&commerce_entity.alias_type_id)
-                    .bind(&commerce_entity.legal_business_name)
-                    .bind(&account_inserted.account_id)
-                    .bind(&commerce_entity.ruc)
-                    .fetch_optional(&*self.pool)
-                    .await?.unwrap();
 
                 // Fetch the inserted commerce
                 let commerce_entity_stored = sqlx::query_as::<_, CommerceEntity>(

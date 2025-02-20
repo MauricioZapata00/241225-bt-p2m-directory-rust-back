@@ -1,4 +1,6 @@
 use std::sync::Arc;
+use sqlx::Error;
+use tracing::log::error;
 use application::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
 use domain::exception::database_error::DatabaseError;
 use domain::model::account::Account;
@@ -16,6 +18,10 @@ impl CommerceRepositoryAdapter {
     pub fn new(commerce_repository: Arc<SqlxCommerceRepository>) -> Self {
         Self { commerce_repository }
     }
+
+    fn log_error_info(err: &Error) {
+        error!("Unexpected error from database. Error is: {:?}", err);
+    }
 }
 
 impl CommerceRepositoryPort for CommerceRepositoryAdapter {
@@ -25,8 +31,14 @@ impl CommerceRepositoryPort for CommerceRepositoryAdapter {
         match self.commerce_repository.create_commerce(&commerce_entity, &commerce.account.bank_code,
         &commerce.account.account_number).await {
             Ok(Some(commerce_db_info_wrapper)) => Ok(map_commerce_db_info_wrapper_entity_to_model(&commerce_db_info_wrapper)),
-            Ok(None) => Err(DatabaseError::Unexpected(Box::from("Unable to return commerce created"))),
-            Err(err) => Err(DatabaseError::Unexpected(err.into()))
+            Ok(None) => {
+                error!("Unable to return commerce created.");
+                Err(DatabaseError::Unexpected(Box::from("Unable to return commerce created")))
+            },
+            Err(err) => {
+                Self::log_error_info(&err);
+                Err(DatabaseError::Unexpected(err.into()))
+            }
         }
     }
 
@@ -36,7 +48,10 @@ impl CommerceRepositoryPort for CommerceRepositoryAdapter {
         match self.commerce_repository.find_commerce_by_ruc_or_alias(ruc, alias).await {
             Ok(Some(_)) => Ok(false),
             Ok(None) => Ok(true),
-            Err(err) => Err(DatabaseError::Unexpected(err.into()))
+            Err(err) => {
+                Self::log_error_info(&err);
+                Err(DatabaseError::Unexpected(err.into()))
+            }
         }
     }
 
@@ -48,7 +63,10 @@ impl CommerceRepositoryPort for CommerceRepositoryAdapter {
             Ok(Some(commerce_entity)) => {Ok(*commerce_entity.legal_business_name == *legal_business_name
                 && *commerce_entity.ruc == *ruc)},
             Ok(None) => Ok(true),
-            Err(err) => Err(DatabaseError::Unexpected(err.into()))
+            Err(err) => {
+                Self::log_error_info(&err);
+                Err(DatabaseError::Unexpected(err.into()))
+            }
         }
     }
 }

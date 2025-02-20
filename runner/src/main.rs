@@ -11,7 +11,7 @@ use tracing_subscriber::FmtSubscriber;
 use tracing::{info, Level};
 use application::service::commerces::create_commerce_service::CreateCommerceService;
 use application::service::commerces::validate_commerce_to_store_service::ValidateCommerceToStoreService;
-use application::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
+
 use domain::model::commerce::Commerce;
 use domain::model::generic_response::GenericResponse;
 use infrastructure::db::mysql::banks::adapter::bank_repository_adapter::BankRepositoryAdapter;

@@ -40,7 +40,7 @@ impl AccountRepository for SqlxAccountRepository {
             .await?;
 
         let result = sqlx::query_as::<_, AccountEntity>(
-            "SELECT * FROM accounts WHERE id = LAST_INSERT_ID()"
+            "SELECT * FROM accounts WHERE account_id = LAST_INSERT_ID()"
         )
             .fetch_optional(&mut *tx)
             .await?;
