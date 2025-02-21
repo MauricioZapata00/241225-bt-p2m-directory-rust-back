@@ -53,10 +53,10 @@ impl SqlxCommerceRepository {
                 // Insert the commerce and get the inserted ID
                 info!("Inserting commerce_entity: {:?}", commerce_entity);
 
-                sqlx::query(
+                let insert_result = sqlx::query(
                     "INSERT INTO commerces (alias, alias_type_id, legal_business_name, account_id,
-                              ruc, commerce_status_id)
-                        VALUES (@p1, @p2, @p3, @p4, @p5, 1);"
+              ruc, commerce_status_id)
+     VALUES (?, ?, ?, ?, ?, 1)"
                 )
                     .bind(&commerce_entity.alias)
                     .bind(&commerce_entity.alias_type_id)
@@ -65,6 +65,9 @@ impl SqlxCommerceRepository {
                     .bind(&commerce_entity.ruc)
                     .execute(&mut *tx)
                     .await?;
+
+                // Log the insert result
+                info!("Insert completed, rows affected: {}", insert_result.rows_affected());
 
                 // Fetch the inserted commerce
                 let commerce_entity_stored = sqlx::query_as::<_, CommerceEntity>(
@@ -76,7 +79,7 @@ impl SqlxCommerceRepository {
 
                 let commerce_status_entity = self
                     .sqlx_commerce_status_repository
-                    .find_commerce_status_by_id(&1)
+                    .find_commerce_status_by_id_tx(&1, &mut tx)
                     .await?;
 
                 tx.commit().await?;
