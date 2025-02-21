@@ -10,4 +10,4 @@ rocket = { version = "0.5.1", features = ["json"] }
 tracing = "0.1.41"
 serde = { version = "1.0.217", features = ["derive"] }
 sqlx = { version = "0.8.3", features = [ "runtime-tokio", "tls-native-tls", "mysql" ] }
-async-trait = "0.1.85"
+async-trait = "0.1.86"

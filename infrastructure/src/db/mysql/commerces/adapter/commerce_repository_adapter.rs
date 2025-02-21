@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use async_trait::async_trait;
 use sqlx::Error;
 use tracing::log::error;
 use application::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
@@ -24,6 +25,7 @@ impl CommerceRepositoryAdapter {
     }
 }
 
+#[async_trait]
 impl CommerceRepositoryPort for CommerceRepositoryAdapter {
     async fn create_commerce(&self, commerce: &Commerce) -> Result<Commerce, DatabaseError> {
         let commerce_entity = map_commerce_to_entity(commerce);

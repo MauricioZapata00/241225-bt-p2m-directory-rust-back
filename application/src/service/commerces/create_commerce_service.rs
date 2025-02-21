@@ -1,6 +1,7 @@
 use std::error::Error as StdError;
 use std::sync::Arc;
-use tracing::{info, instrument};
+use async_trait::async_trait;
+use tracing::{info};
 use domain::model::commerce::Commerce;
 use crate::port::db::commerces::commerce_repository_port::CommerceRepositoryPort;
 use crate::use_case::commerces::create_commerce_use_case::CreateCommerceUseCase;
@@ -26,8 +27,13 @@ impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceServ
     }
 }
 
-impl<VC: ValidateCommerceToStore, CR: CommerceRepositoryPort> CreateCommerceUseCase
-for CreateCommerceService<VC, CR> {
+#[async_trait]
+impl<VC, CR> CreateCommerceUseCase
+for CreateCommerceService<VC, CR>
+where
+    VC: ValidateCommerceToStore + Send + Sync + 'static,
+    CR: CommerceRepositoryPort + Send + Sync + 'static
+{
     async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn StdError + Send + Sync>> {
 
         info!("Validating commerce: {:?}", commerce);

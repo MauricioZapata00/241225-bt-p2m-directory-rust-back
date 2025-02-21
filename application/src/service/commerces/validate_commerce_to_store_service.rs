@@ -1,5 +1,6 @@
 use std::error::Error as StdError;
 use std::sync::Arc;
+use async_trait::async_trait;
 use lazy_static::lazy_static;
 use regex::Regex;
 use tracing::{error, info};
@@ -92,8 +93,13 @@ impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
     }
 }
 
-impl<BR: BankRepositoryPort, CR: CommerceRepositoryPort> ValidateCommerceToStore
-for ValidateCommerceToStoreService<BR, CR> {
+#[async_trait]
+impl<BR, CR> ValidateCommerceToStore
+for ValidateCommerceToStoreService<BR, CR>
+where
+    BR: BankRepositoryPort + Send + Sync + 'static,
+    CR: CommerceRepositoryPort + Send + Sync + 'static
+{
     async fn process(&self, commerce: Commerce) -> Result<Commerce, Box<dyn StdError + Send + Sync>> {
         info!("Validating commerce field formats");
         validate_commerce_field_formats(&commerce)?;

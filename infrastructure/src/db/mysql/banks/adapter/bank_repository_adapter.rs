@@ -1,4 +1,5 @@
 use std::sync::Arc;
+use async_trait::async_trait;
 use tracing::error;
 use application::port::db::banks::bank_repository_port::BankRepositoryPort;
 use domain::exception::database_error::DatabaseError;
@@ -14,6 +15,7 @@ impl BankRepositoryAdapter {
     }
 }
 
+#[async_trait]
 impl BankRepositoryPort for BankRepositoryAdapter {
 
     async fn validate_if_bank_exists_exists_by_bank_code(&self, bank_code: &String)

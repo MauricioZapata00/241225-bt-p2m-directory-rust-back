@@ -1,6 +1,8 @@
+use async_trait::async_trait;
 use domain::exception::database_error::DatabaseError;
 use domain::model::commerce::Commerce;
 
+#[async_trait]
 pub trait CommerceRepositoryPort {
     async fn create_commerce(&self, commerce: &Commerce) -> Result<Commerce, DatabaseError>;
     async fn commerce_does_not_exist_by_ruc_and_alias(&self, ruc: &String, alias: &String)
