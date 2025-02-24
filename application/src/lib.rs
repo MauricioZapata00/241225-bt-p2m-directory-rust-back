@@ -12,6 +12,11 @@ pub mod service {
     pub mod commerces{
         pub mod create_commerce_service;
         pub mod validate_commerce_to_store_service;
+
+        #[cfg(test)]
+        pub mod tests {
+            pub mod create_commerce_service_test;
+        }
     }
 }
 pub mod use_case {

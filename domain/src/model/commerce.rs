@@ -2,7 +2,7 @@ use serde::{Serialize, Deserialize};
 use crate::model::commerce_status::CommerceStatus;
 use crate::model::account::Account;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
 pub struct Commerce {
     pub commerce_id: i64,
     pub alias: String,
